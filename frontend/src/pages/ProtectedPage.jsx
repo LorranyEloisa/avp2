@@ -9,9 +9,32 @@ export default function ProtectedPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  function loadProfile() {
+  async function loadProfile() {
     // TODO: pegar o token salvo no localStorage usando getToken.
+    const token = getToken();
     // TODO: se não existir token, redirecionar para /login.
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+    try{
+      setLoading(true);
+      const resposta = await api.get("/users/profile", { headers: { Authorization: `Bearer ${token}` } });
+      setUser(resposta.data);
+
+
+
+    }catch{
+      removeToken();
+
+      const message = "Erro ao carregar perfil. Faça login novamente.";
+      navigate("/login");
+      setError("Erro ao carregar perfil. Faça login novamente.");
+    }finally{
+
+
+    }
+    }
     // TODO: ativar loading.
     // TODO: chamar GET /users/profile usando api.get.
     // TODO: enviar o token no header Authorization no formato Bearer TOKEN.
@@ -20,11 +43,13 @@ export default function ProtectedPage() {
     // TODO: mostrar mensagem de erro se acontecer algum problema.
     // TODO: desativar loading no final.
     // Dica: api.get("/users/profile", { headers: { Authorization: `Bearer ${token}` } })
-  }
+  
 
   function handleLogout() {
     // TODO: remover o token usando removeToken.
+    removeToken();
     // TODO: redirecionar para /login.
+    navigate("/login");
   }
 
   useEffect(() => {
